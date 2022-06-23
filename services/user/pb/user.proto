@@ -1,0 +1,34 @@
+syntax = "proto3";
+package pb;
+
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/hosseintrz/torob/user/pb";
+
+message UserMsg {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string fullname = 4;
+  google.protobuf.Timestamp createdDate = 5;
+  enum Role{
+    NORMAL = 0;
+    ADMIN = 1;
+    OWNER = 2;
+  }
+  Role role = 6;
+}
+
+message UserResponse{
+  string message = 1;
+}
+
+message UserRequest{
+  string username = 1;
+}
+
+service User{
+  rpc AddUser(UserMsg) returns (UserResponse){}
+  rpc GetUser(UserRequest) returns (UserMsg){}
+  rpc DeleteUser(UserRequest) returns (UserResponse){}
+  rpc UpdateUser(UserMsg) returns (UserResponse){}
+}
