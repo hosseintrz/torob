@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/hosseintrz/torob/user/internal/model"
 	"github.com/hosseintrz/torob/user/internal/persistence"
-	"github.com/hosseintrz/torob/user/pb"
+	pb "github.com/hosseintrz/torob/user/pb/user"
+
 	"github.com/hosseintrz/torob/user/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -47,6 +48,8 @@ func (u *UserService) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Use
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("userrole: ", user.Role)
+	fmt.Println("role : ", pb.UserMsg_Role(user.Role))
 	return &pb.UserMsg{
 		Fullname:    user.FullName,
 		Username:    user.Username,

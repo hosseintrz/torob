@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	pb "github.com/hosseintrz/torob/auth/pb/user"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,19 +24,12 @@ func InitUserServiceClient(url string) *UserServiceClient {
 	return client
 }
 
-func (c *UserServiceClient) AddUser(fullName, email, username, password string, role int32) (string, error) {
-	userMsg := &pb.UserMsg{
-		Fullname: fullName,
-		Email:    email,
-		Username: username,
-		Password: password,
-		Role:     pb.UserMsg_Role(role),
-	}
+func (c *UserServiceClient) AddUser(userMsg *pb.UserMsg) (string, error) {
 	_, err := c.Client.AddUser(context.Background(), userMsg)
 	if err != nil {
 		return "", err
 	}
-	return username, nil
+	return userMsg.GetUsername(), nil
 }
 
 func (c *UserServiceClient) GetUser(username string) (*pb.UserMsg, error) {
@@ -43,6 +37,7 @@ func (c *UserServiceClient) GetUser(username string) (*pb.UserMsg, error) {
 		Username: username,
 	}
 	user, err := c.Client.GetUser(context.Background(), req)
+	fmt.Println("userclient -> user: ", user)
 	return user, err
 }
 

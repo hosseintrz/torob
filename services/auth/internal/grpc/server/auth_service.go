@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hosseintrz/torob/auth/conf"
-	"github.com/hosseintrz/torob/auth/internal"
 	"github.com/hosseintrz/torob/auth/internal/grpc/client"
+	"github.com/hosseintrz/torob/auth/internal/jwt"
 	"github.com/hosseintrz/torob/auth/internal/utils"
 	pb "github.com/hosseintrz/torob/auth/pb/auth"
+	pb2 "github.com/hosseintrz/torob/auth/pb/user"
 	"net/mail"
 	"unicode"
 )
@@ -51,16 +52,18 @@ func (a *AuthService) Signup(ctx context.Context, dto *pb.SignupRequest) (*pb.Au
 		return nil, err
 	}
 	dto.Password = enc
-	_, err = a.UserGrpc.AddUser(
-		dto.Fullname,
-		dto.Email,
-		dto.Username,
-		dto.Password,
-		int32(dto.Role))
+	userMsg := &pb2.UserMsg{
+		Fullname: dto.Fullname,
+		Email:    dto.Email,
+		Username: dto.Username,
+		Password: dto.Password,
+		Role:     pb2.UserMsg_Role(dto.Role),
+	}
+	_, err = a.UserGrpc.AddUser(userMsg)
 	if err != nil {
 		return nil, err
 	}
-	token, err := internal.GetSignedToken()
+	token, err := jwt.GetSignedToken(userMsg)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +75,7 @@ func (a *AuthService) Login(ctx context.Context, dto *pb.LoginRequest) (*pb.Auth
 	if err != nil {
 		return nil, ErrUserNotFound
 	}
-
+	fmt.Println("authservice login : user : ", user)
 	secret, err := conf.GetEnv("SECRET")
 	if err != nil {
 		return nil, err
@@ -87,11 +90,31 @@ func (a *AuthService) Login(ctx context.Context, dto *pb.LoginRequest) (*pb.Auth
 		return nil, ErrWrongPassword
 	}
 
-	token, err := internal.GetSignedToken()
+	token, err := jwt.GetSignedToken(user)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.AuthResponse{Response: token}, nil
+}
+
+func (a *AuthService) ValidateToken(ctx context.Context, req *pb.ValidationRequest) (*pb.ValidationResponse, error) {
+	secret, err := conf.GetEnv("JWT_SECRET")
+	if err != nil {
+		fmt.Println("error getting secret")
+		return nil, err
+	}
+	user, err := jwt.ValidateToken(req.Token, secret)
+	if err != nil {
+		return nil, err
+	}
+	//	fmt.Printf("user is :%v\n", user)
+	return &pb.ValidationResponse{
+		Fullname: user.Fullname,
+		Username: user.Username,
+		Email:    user.Email,
+		Password: user.Password,
+		Role:     pb.ValidationResponse_Role(user.Role),
+	}, nil
 }
 
 func validate(dto *pb.SignupRequest) error {

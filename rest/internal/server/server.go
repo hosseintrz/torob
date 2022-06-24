@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/hosseintrz/torob/rest/internal/gateway"
+	"github.com/hosseintrz/torob/rest/internal/middleware"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,10 +25,18 @@ func New(conf *Config, ac *gateway.AuthClient) *RestServer {
 }
 
 func (s *RestServer) setupRoutes() {
+	s.echo.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return middleware.JwtValidation(next, s.authGrpc)
+	})
+
 	s.echo.POST("/signup", s.Signup)
 	s.echo.POST("/login", s.Login)
 	s.echo.GET("/test", func(c echo.Context) error {
 		return c.String(200, "something")
+	})
+	s.echo.GET("/nice", func(c echo.Context) error {
+		fmt.Printf("current user is : %s\n", c.Get("user"))
+		return c.String(200, "nice path")
 	})
 }
 

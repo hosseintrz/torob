@@ -49,3 +49,14 @@ func (c *AuthClient) Login(username, password string) (*pb.AuthResponse, error) 
 	}
 	return res, nil
 }
+
+func (c *AuthClient) ValidateToken(token string) (*pb.ValidationResponse, error) {
+	req := &pb.ValidationRequest{
+		Token: token,
+	}
+	payload, err := c.Client.ValidateToken(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}

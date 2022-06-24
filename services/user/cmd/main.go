@@ -5,7 +5,7 @@ import (
 	db "github.com/hosseintrz/torob/user/internal/db"
 	"github.com/hosseintrz/torob/user/internal/persistence"
 	"github.com/hosseintrz/torob/user/internal/service"
-	"github.com/hosseintrz/torob/user/pb"
+	pb "github.com/hosseintrz/torob/user/pb/user"
 	"google.golang.org/grpc"
 	"log"
 	"net"
