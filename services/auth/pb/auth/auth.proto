@@ -9,9 +9,10 @@ message SignupRequest{
   string password = 3;
   string fullname = 4;
   enum Role{
-    NORMAL = 0;
-    ADMIN = 1;
-    OWNER = 2;
+    UNKNOWN = 0;
+    NORMAL = 1;
+    ADMIN = 2;
+    OWNER = 3;
   }
   Role role = 5;
 }
@@ -25,9 +26,26 @@ message AuthResponse {
   string response = 1;
 }
 
+message ValidationRequest{
+  string token = 1;
+}
+message ValidationResponse{
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string fullname = 4;
+  enum Role{
+    NORMAL = 0;
+    ADMIN = 1;
+    OWNER = 2;
+  }
+  Role role = 5;
+}
+
 service auth{
   rpc Signup(SignupRequest) returns (AuthResponse){}
   rpc Login(LoginRequest) returns (AuthResponse){}
+  rpc ValidateToken(ValidationRequest) returns (ValidationResponse){}
 }
 
 
