@@ -2,22 +2,29 @@ package server
 
 import (
 	"fmt"
-	"github.com/hosseintrz/torob/rest/internal/gateway"
+	"github.com/hosseintrz/torob/rest/conf"
+	"github.com/hosseintrz/torob/rest/internal/gateway/clients"
 	"github.com/hosseintrz/torob/rest/internal/middleware"
 	"github.com/labstack/echo/v4"
 )
 
 type RestServer struct {
-	echo     *echo.Echo
-	authGrpc *gateway.AuthClient
-	conf     *Config
+	echo        *echo.Echo
+	authGrpc    *clients.AuthClient
+	productGrpc *clients.ProductClient
+	conf        *conf.Config
 }
 
-func New(conf *Config, ac *gateway.AuthClient) *RestServer {
+func New(conf *conf.Config, authConf *conf.Config, prodConf *conf.Config) *RestServer {
 	server := &RestServer{
-		authGrpc: ac,
-		conf:     conf,
+		conf:        conf,
+		authGrpc:    clients.NewAuthClient(authConf),
+		productGrpc: clients.NewProductClient(prodConf),
 	}
+
+	server.authGrpc.Connect()
+	server.productGrpc.Connect()
+
 	server.echo = echo.New()
 	server.echo.HideBanner = true
 	server.setupRoutes()
@@ -31,6 +38,10 @@ func (s *RestServer) setupRoutes() {
 
 	s.echo.POST("/signup", s.Signup)
 	s.echo.POST("/login", s.Login)
+	s.echo.POST("/categories", s.CreateCategory)
+	s.echo.POST("/products", s.CreateProduct)
+	s.echo.GET("/products/:id", s.GetProduct)
+
 	s.echo.GET("/test", func(c echo.Context) error {
 		return c.String(200, "something")
 	})
