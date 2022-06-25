@@ -1,7 +1,9 @@
-package gateway
+package clients
 
 import (
 	"context"
+	"fmt"
+	"github.com/hosseintrz/torob/rest/conf"
 	pb "github.com/hosseintrz/torob/rest/pb/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -9,18 +11,21 @@ import (
 )
 
 type AuthClient struct {
+	Conf   *conf.Config
 	Client pb.AuthClient
 }
 
-func InitAuthClient(url string) *AuthClient {
-	conn, err := grpc.Dial(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewAuthClient(conf *conf.Config) *AuthClient {
+	return &AuthClient{Conf: conf}
+}
+
+func (c *AuthClient) Connect() {
+	addr := fmt.Sprintf("%s:%s", c.Conf.Host, c.Conf.Port)
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Couldn't connect to auth service: %s\n", err)
 	}
-	client := &AuthClient{
-		Client: pb.NewAuthClient(conn),
-	}
-	return client
+	c.Client = pb.NewAuthClient(conn)
 }
 
 func (c *AuthClient) Signup(fullName, email, username, password string, role int32) (*pb.AuthResponse, error) {

@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.7.2
+	github.com/mitchellh/mapstructure v1.5.0
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.27.1
 )

@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/hosseintrz/torob/rest/internal/gateway"
+	"github.com/hosseintrz/torob/rest/internal/gateway/clients"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func JwtValidation(next echo.HandlerFunc, ac *gateway.AuthClient) echo.HandlerFunc {
+func JwtValidation(next echo.HandlerFunc, ac *clients.AuthClient) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fmt.Println("entered middleware")
 		if uri := c.Request().RequestURI; uri == "/signup" || uri == "/login" {

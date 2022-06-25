@@ -17,3 +17,8 @@ func GetEnv(key string) (string, error) {
 	}
 	return secret, nil
 }
+
+type Config struct {
+	Host string
+	Port string
+}
