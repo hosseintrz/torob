@@ -19,8 +19,12 @@ func main() {
 		Host: "localhost",
 		Port: "8282",
 	}
+	suppConf := &conf.Config{
+		Host: "localhost",
+		Port: "9191",
+	}
 
-	s := server.New(restConf, authConf, prodConf)
+	s := server.New(restConf, authConf, prodConf, suppConf)
 	errChan := s.Serve()
 	select {
 	case err := <-errChan:

@@ -9,21 +9,24 @@ import (
 )
 
 type RestServer struct {
-	echo        *echo.Echo
-	authGrpc    *clients.AuthClient
-	productGrpc *clients.ProductClient
-	conf        *conf.Config
+	echo         *echo.Echo
+	authGrpc     *clients.AuthClient
+	productGrpc  *clients.ProductClient
+	supplierGrpc *clients.SupplierClient
+	conf         *conf.Config
 }
 
-func New(conf *conf.Config, authConf *conf.Config, prodConf *conf.Config) *RestServer {
+func New(conf *conf.Config, authConf *conf.Config, prodConf *conf.Config, suppConf *conf.Config) *RestServer {
 	server := &RestServer{
-		conf:        conf,
-		authGrpc:    clients.NewAuthClient(authConf),
-		productGrpc: clients.NewProductClient(prodConf),
+		conf:         conf,
+		authGrpc:     clients.NewAuthClient(authConf),
+		productGrpc:  clients.NewProductClient(prodConf),
+		supplierGrpc: clients.NewSupplierClient(suppConf),
 	}
 
 	server.authGrpc.Connect()
 	server.productGrpc.Connect()
+	server.supplierGrpc.Connect()
 
 	server.echo = echo.New()
 	server.echo.HideBanner = true
@@ -36,11 +39,19 @@ func (s *RestServer) setupRoutes() {
 		return middleware.JwtValidation(next, s.authGrpc)
 	})
 
+	//auth service
 	s.echo.POST("/signup", s.Signup)
 	s.echo.POST("/login", s.Login)
+
+	//product service
 	s.echo.POST("/categories", s.CreateCategory)
 	s.echo.POST("/products", s.CreateProduct)
 	s.echo.GET("/products/:id", s.GetProduct)
+
+	//supplier service
+	s.echo.POST("/stores", s.AddStore)
+	s.echo.POST("/offers", s.SubmitOffer)
+	s.echo.GET("/offers/:prodId", s.GetProductOffers)
 
 	s.echo.GET("/test", func(c echo.Context) error {
 		return c.String(200, "something")

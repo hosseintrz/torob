@@ -99,3 +99,57 @@ func (s RestServer) GetProduct(c echo.Context) error {
 	}
 	return c.JSONPretty(200, fields, " ")
 }
+
+func (s RestServer) AddStore(c echo.Context) error {
+	dto := new(struct {
+		OwnerId   string `json:"owner_id"`
+		StoreName string `json:"store_name"`
+		StoreUrl  string `json:"store_url"`
+		City      string `json:"city"`
+	})
+	if err := c.Bind(dto); err != nil {
+		return c.String(400, err.Error())
+	}
+	res, err := s.supplierGrpc.AddStore(dto.OwnerId, dto.StoreName, dto.StoreUrl, dto.City)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+	return c.String(http.StatusOK, res)
+}
+
+func (s RestServer) SubmitOffer(c echo.Context) error {
+	dto := new(struct {
+		StoreId   string `json:"store_id"`
+		ProductId string `json:"product_id"`
+		Url       string `json:"url"`
+		Desc      string `json:"description"`
+		Price     int    `json:"price"`
+	})
+	if err := c.Bind(dto); err != nil {
+		return c.String(400, err.Error())
+	}
+	res, err := s.supplierGrpc.SubmitOffer(dto.StoreId, dto.ProductId, dto.Url, dto.Desc, int32(dto.Price))
+	if err != nil {
+		return c.String(400, err.Error())
+	}
+	return c.String(http.StatusOK, res)
+}
+
+func (s RestServer) GetProductOffers(c echo.Context) error {
+	url := c.Request().URL
+	paths := strings.Split(url.String(), "/")
+	prodId := paths[len(paths)-1]
+	offers, err := s.supplierGrpc.GetProductOffers(prodId)
+	//var response []*struct {
+	//	StoreName string `json:"store_name"`
+	//	StoreCity string `json:"store_city"`
+	//	Price int32 `json:"price"`
+	//	ProdDesc string `json:"description"`
+	//	Url string `json:"url"`
+	//}
+	fmt.Println("offers : ", offers)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, offers)
+}
