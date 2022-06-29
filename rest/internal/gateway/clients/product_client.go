@@ -22,7 +22,7 @@ func (c *ProductClient) Connect() {
 	addr := fmt.Sprintf("%s:%s", c.Conf.Host, c.Conf.Port)
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("Couldn't connect to category service: %s\n", err)
+		log.Fatalf("Couldn't connect to product service: %s\n", err)
 	}
 	c.Client = pb.NewProductClient(conn)
 }
