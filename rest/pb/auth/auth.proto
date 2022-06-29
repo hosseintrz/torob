@@ -9,9 +9,10 @@ message SignupRequest{
   string password = 3;
   string fullname = 4;
   enum Role{
-    NORMAL = 0;
-    ADMIN = 1;
-    OWNER = 2;
+    UNKNOWN = 0;
+    NORMAL = 1;
+    ADMIN = 2;
+    OWNER = 3;
   }
   Role role = 5;
 }
