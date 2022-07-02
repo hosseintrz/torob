@@ -1,17 +1,21 @@
-package middleware
+package middlewares
 
 import (
 	"github.com/hosseintrz/torob/rest/internal/gateway/clients"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"strings"
 )
 
-func JwtValidation(next echo.HandlerFunc, ac *clients.AuthClient) echo.HandlerFunc {
+func JwtValidation(next echo.HandlerFunc, ac *clients.AuthClient, skipper middleware.Skipper) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if uri := c.Request().RequestURI; uri == "/signup" || uri == "/login" {
+		if skipper(c) {
 			return next(c)
 		}
+		//if uri := c.Request().RequestURI; uri == "/signup" || uri == "/login" {
+		//		return next(c)
+		//	}
 		if _, ok := c.Request().Header["Authorization"]; !ok {
 			return c.String(http.StatusUnauthorized, "authorization header is missing")
 		}
