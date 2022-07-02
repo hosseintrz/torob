@@ -7,7 +7,9 @@ option go_package = "github.com/hosseintrz/torob/product/pb";
 message CreateProductReq{
   string name = 1;
   string category = 2;
-  map<string,string> fields = 3;
+  string imageUrl = 3;
+  int32 minPrice = 4;
+  map<string,string> fields = 5;
 }
 message CreateProductRes{
   string message = 1;
@@ -20,21 +22,44 @@ message GetProductRes{
   string id = 1;
   string name = 2;
   string category = 3;
-  map<string,string> fields = 4;
+  string imageUrl = 4;
+  int32 minPrice = 5;
+  map<string,string> fields = 6;
 }
 //category
 message CategoryRequest{
   string name = 1;
   string parent = 2;
+  string desc = 3;
 }
 message CategoryResponse{
   string message = 1;
 }
 
+message GetProductsReq{
+  string category = 1;
+}
+message GetProductsRes{
+  string id = 1;
+  string name = 2;
+  string category = 3;
+  string imageUrl = 4;
+  int32 minPrice = 5;
+  map<string,string> fields = 6;
+}
+
+message GetCategoriesReq {}
+message GetCategoriesRes{
+  string name = 1;
+  string path = 2;
+  string description = 3;
+}
 
 service Product{
   rpc CreateProduct(CreateProductReq) returns (CreateProductRes){}
   rpc GetProduct(GetProductReq) returns (GetProductRes){}
   rpc CreateCategory(CategoryRequest) returns (CategoryResponse){}
+  rpc GetProductsByType(GetProductsReq) returns (stream GetProductsRes){}
+  rpc GetCategories(GetCategoriesReq) returns (stream GetCategoriesRes){}
 }
 
