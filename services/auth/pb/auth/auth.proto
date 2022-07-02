@@ -23,24 +23,25 @@ message LoginRequest{
 }
 
 message AuthResponse {
-  string response = 1;
+  string token = 1;
 }
 
 message ValidationRequest{
   string token = 1;
 }
 message ValidationResponse{
-  string email = 1;
-  string username = 2;
-  string password = 3;
-  string fullname = 4;
+  string id = 1;
+  string email = 2;
+  string username = 3;
+  string password = 4;
+  string fullname = 5;
   enum Role{
     UNKNOWN = 0;
     NORMAL = 1;
     ADMIN = 2;
     OWNER = 3;
   }
-  Role role = 5;
+  Role role = 6;
 }
 
 service auth{

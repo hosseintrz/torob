@@ -59,15 +59,16 @@ func (a *AuthService) Signup(ctx context.Context, dto *pb.SignupRequest) (*pb.Au
 		Password: dto.Password,
 		Role:     pb2.UserMsg_Role(dto.Role),
 	}
-	_, err = a.UserGrpc.AddUser(userMsg)
+	insertedId, err := a.UserGrpc.AddUser(userMsg)
 	if err != nil {
 		return nil, err
 	}
+	userMsg.Id = insertedId
 	token, err := jwt.GetSignedToken(userMsg)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.AuthResponse{Response: token}, nil
+	return &pb.AuthResponse{Token: token}, nil
 }
 
 func (a *AuthService) Login(ctx context.Context, dto *pb.LoginRequest) (*pb.AuthResponse, error) {
@@ -75,7 +76,6 @@ func (a *AuthService) Login(ctx context.Context, dto *pb.LoginRequest) (*pb.Auth
 	if err != nil {
 		return nil, ErrUserNotFound
 	}
-	fmt.Println("authservice login : user : ", user)
 	secret, err := conf.GetEnv("SECRET")
 	if err != nil {
 		return nil, err
@@ -89,12 +89,11 @@ func (a *AuthService) Login(ctx context.Context, dto *pb.LoginRequest) (*pb.Auth
 	if user.Password != dto.Password {
 		return nil, ErrWrongPassword
 	}
-
 	token, err := jwt.GetSignedToken(user)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.AuthResponse{Response: token}, nil
+	return &pb.AuthResponse{Token: token}, nil
 }
 
 func (a *AuthService) ValidateToken(ctx context.Context, req *pb.ValidationRequest) (*pb.ValidationResponse, error) {
@@ -109,6 +108,7 @@ func (a *AuthService) ValidateToken(ctx context.Context, req *pb.ValidationReque
 	}
 	//	fmt.Printf("user is :%v\n", user)
 	return &pb.ValidationResponse{
+		Id:       user.Id,
 		Fullname: user.Fullname,
 		Username: user.Username,
 		Email:    user.Email,
