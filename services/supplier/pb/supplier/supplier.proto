@@ -35,8 +35,41 @@ message ProdOfferRes{
   string url = 5;
 }
 
+
+message GetStoresReq{
+  string ownerId = 1;
+}
+message GetStoresRes{
+  string storeId = 1;
+  string ownerId = 2;
+  string storeName = 3;
+  string storeUrl = 4;
+  string city = 5;
+}
+
+message GetStoreInfoReq{
+  string storeId = 1;
+}
+message GetStoreInfoRes{
+  string storeId = 1;
+  string ownerId = 2;
+  string storeName = 3;
+  string storeUrl = 4;
+  string city = 5;
+  message Offer{
+    string productId = 1;
+    int32 price = 2;
+    string url = 3;
+    string description = 4;
+  }
+  repeated Offer offers = 6;
+}
+
+
 service Supplier{
   rpc SubmitOffer(OfferReq) returns (OfferRes) {};
   rpc AddStore(AddStoreReq) returns (AddStoreRes){};
   rpc GetProductOffers(ProdOfferReq) returns (stream ProdOfferRes){};
+  rpc GetStores(GetStoresReq) returns (stream GetStoresRes){};
+  rpc GetStoreInfo(GetStoreInfoReq) returns(GetStoreInfoRes){};
 }

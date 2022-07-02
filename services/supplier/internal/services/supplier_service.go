@@ -31,7 +31,7 @@ func (s *SupplierService) AddStore(ctx context.Context, req *pb.AddStoreReq) (*p
 		return nil, err
 	}
 	return &pb.AddStoreRes{
-		Response: res,
+		Response: res.Hex(),
 	}, nil
 }
 func (s *SupplierService) GetProductOffers(req *pb.ProdOfferReq, stream pb.Supplier_GetProductOffersServer) error {
@@ -55,4 +55,48 @@ func (s *SupplierService) GetProductOffers(req *pb.ProdOfferReq, stream pb.Suppl
 		}
 	}
 	return nil
+}
+func (s *SupplierService) GetStores(req *pb.GetStoresReq, stream pb.Supplier_GetStoresServer) error {
+	stores, err := s.Repo.GetStores(req.GetOwnerId())
+	if err != nil {
+		return err
+	}
+	for _, store := range stores {
+		if err = stream.Send(&pb.GetStoresRes{
+			StoreId:   store.ID.Hex(),
+			StoreName: store.Name,
+			StoreUrl:  store.Url,
+			City:      store.City,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+
+func (s *SupplierService) GetStoreInfo(ctx context.Context, req *pb.GetStoreInfoReq) (*pb.GetStoreInfoRes, error) {
+	res, err := s.Repo.GetStore(req.GetStoreId())
+	if err != nil {
+		return nil, err
+	}
+	offers, err := s.Repo.GetStoreOffers(req.GetStoreId())
+	offersDto := make([]*pb.GetStoreInfoRes_Offer, 0)
+	for _, offer := range offers {
+		offersDto = append(offersDto, &pb.GetStoreInfoRes_Offer{
+			ProductId:   offer.ProductId,
+			Price:       offer.Price,
+			Url:         offer.Url,
+			Description: offer.Description,
+		})
+	}
+	dto := &pb.GetStoreInfoRes{
+		StoreId:   res.ID.Hex(),
+		OwnerId:   res.OwnerId,
+		StoreName: res.Name,
+		StoreUrl:  res.Url,
+		City:      res.City,
+		Offers:    offersDto,
+	}
+	return dto, nil
 }

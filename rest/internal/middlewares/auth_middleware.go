@@ -1,23 +1,26 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/hosseintrz/torob/rest/internal/gateway/clients"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strings"
 )
 
 func JwtValidation(next echo.HandlerFunc, ac *clients.AuthClient) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		fmt.Println("entered middleware")
 		if uri := c.Request().RequestURI; uri == "/signup" || uri == "/login" {
 			return next(c)
 		}
-		if _, ok := c.Request().Header["Token"]; !ok {
-			return c.String(http.StatusUnauthorized, "token is missing")
+		if _, ok := c.Request().Header["Authorization"]; !ok {
+			return c.String(http.StatusUnauthorized, "authorization header is missing")
 		}
-		token := c.Request().Header["Token"][0]
-		res, err := ac.ValidateToken(token)
+		authHeader := c.Request().Header["Authorization"][0]
+		str := strings.Split(authHeader, " ")
+		if str[0] != "JWT" {
+			return c.String(http.StatusUnauthorized, "authentication method not supported")
+		}
+		res, err := ac.ValidateToken(str[1])
 		if err != nil {
 			return c.String(http.StatusUnauthorized, "token is invalid")
 		}

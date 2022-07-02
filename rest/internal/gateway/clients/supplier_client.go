@@ -75,7 +75,37 @@ func (c *SupplierClient) GetProductOffers(productId string) ([]*pb.ProdOfferRes,
 			return nil, err
 		}
 		//		fmt.Println(offer.StoreName)
-		offers = append(offers,offer)
+		offers = append(offers, offer)
 	}
-	return offers,nil
+	return offers, nil
+}
+
+func (c *SupplierClient) GetStores(ownerId string) ([]*pb.GetStoresRes, error) {
+	stores := make([]*pb.GetStoresRes, 0)
+	req := &pb.GetStoresReq{
+		OwnerId: ownerId,
+	}
+	stream, err := c.Client.GetStores(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		store, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		stores = append(stores, store)
+	}
+	return stores, nil
+}
+
+func (c *SupplierClient) GetStoreInfo(storeId string) (*pb.GetStoreInfoRes, error) {
+	res, err := c.Client.GetStoreInfo(context.Background(), &pb.GetStoreInfoReq{StoreId: storeId})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
