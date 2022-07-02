@@ -2,10 +2,12 @@ package persistence
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/hosseintrz/torob/user/internal/db"
 	"github.com/hosseintrz/torob/user/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -21,13 +23,17 @@ func NewMongoLayer(db *db.MongoDB) *MongoLayer {
 	return &MongoLayer{db: db}
 }
 
-func (m *MongoLayer) AddUser(user *model.User) ([]byte, error) {
+func (m *MongoLayer) AddUser(user *model.User) (primitive.ObjectID, error) {
+	user.ID = primitive.NewObjectID()
 	res, err := m.db.Client.Database(DB).Collection(USERS).InsertOne(context.Background(), user)
 	if err != nil {
-		return nil, err
+		return primitive.NilObjectID, err
 	}
-	insertedId, err := json.Marshal(res.InsertedID)
-	return insertedId, err
+	if objId, ok := res.InsertedID.(primitive.ObjectID); ok {
+		fmt.Println("mongo adduser id: ", objId.IsZero())
+		return objId, nil
+	}
+	return primitive.NilObjectID, errors.New("couldn't convert id to objid -> adduser")
 }
 
 func (m *MongoLayer) GetUser(username string) (*model.User, error) {

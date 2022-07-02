@@ -1,9 +1,12 @@
 package model
 
-import "time"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+)
 
 type User struct {
-	ID          string
+	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	FullName    string
 	Username    string
 	Email       string
@@ -12,9 +15,8 @@ type User struct {
 	Role        int32
 }
 
-func NewUser(id, fullName, username, email, password string, createdDate time.Time, role int32) *User {
+func NewUser(fullName, username, email, password string, createdDate time.Time, role int32) *User {
 	return &User{
-		ID:          id,
 		FullName:    fullName,
 		Username:    username,
 		Email:       email,

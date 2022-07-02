@@ -25,11 +25,12 @@ func InitUserServiceClient(url string) *UserServiceClient {
 }
 
 func (c *UserServiceClient) AddUser(userMsg *pb.UserMsg) (string, error) {
-	_, err := c.Client.AddUser(context.Background(), userMsg)
+	res, err := c.Client.AddUser(context.Background(), userMsg)
 	if err != nil {
 		return "", err
 	}
-	return userMsg.GetUsername(), nil
+	insertedId := res.GetMessage()
+	return insertedId, nil
 }
 
 func (c *UserServiceClient) GetUser(username string) (*pb.UserMsg, error) {

@@ -6,7 +6,6 @@ import (
 	"github.com/hosseintrz/torob/user/internal/model"
 	"github.com/hosseintrz/torob/user/internal/persistence"
 	pb "github.com/hosseintrz/torob/user/pb/user"
-
 	"github.com/hosseintrz/torob/user/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -27,7 +26,6 @@ func (u *UserService) AddUser(ctx context.Context, userMsg *pb.UserMsg) (*pb.Use
 		return nil, errors.ErrUserExists
 	}
 	id, err := u.Repository.AddUser(model.NewUser(
-		"",
 		userMsg.Fullname,
 		userMsg.Username,
 		userMsg.Email,
@@ -38,8 +36,9 @@ func (u *UserService) AddUser(ctx context.Context, userMsg *pb.UserMsg) (*pb.Use
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("user_service added user id: ", id.Hex())
 	return &pb.UserResponse{
-		Message: fmt.Sprintf("user with id %d added successfully", id),
+		Message: id.Hex(),
 	}, nil
 }
 
@@ -51,6 +50,7 @@ func (u *UserService) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Use
 	fmt.Println("userrole: ", user.Role)
 	fmt.Println("role : ", pb.UserMsg_Role(user.Role))
 	return &pb.UserMsg{
+		Id:          user.ID.Hex(),
 		Fullname:    user.FullName,
 		Username:    user.Username,
 		Email:       user.Email,
@@ -72,7 +72,6 @@ func (u *UserService) DeleteUser(ctx context.Context, req *pb.UserRequest) (*pb.
 
 func (u *UserService) UpdateUser(ctx context.Context, userMsg *pb.UserMsg) (*pb.UserResponse, error) {
 	user := model.NewUser(
-		"",
 		userMsg.Fullname,
 		userMsg.Username,
 		userMsg.Email,
